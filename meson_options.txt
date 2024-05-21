@@ -1,0 +1,1 @@
+option('rgb', type: 'string', value: '/etc/X11/rgb.txt', description: 'Set path to rgb.txt file')
