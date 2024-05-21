@@ -230,6 +230,10 @@ typedef struct {
   gboolean use_posy;
   gint posy;
   gchar *geometry;
+#ifdef HAVE_GTK_LAYER_SHELL
+  gchar *layer;
+  gchar *edge;
+#endif
   guint timeout;
   gchar *to_indicator;
   gchar *dialog_text;

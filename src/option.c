@@ -100,6 +100,12 @@ static GOptionEntry general_options[] = {
     N_("Set the Y position of a window"), N_("NUMBER") },
   { "geometry", 0, 0, G_OPTION_ARG_STRING, &options.data.geometry,
     N_("Set the window geometry"), N_("WxH+X+Y") },
+#ifdef HAVE_GTK_LAYER_SHELL
+  { "layer", 0, 0, G_OPTION_ARG_STRING, &options.data.layer,
+    N_("Set the dialog layer"), N_("LAYER") },
+  { "edge", 0, 0, G_OPTION_ARG_STRING, &options.data.edge,
+    N_("Set the dialog screen edge"), N_("EDGE") },
+#endif
   { "timeout", 0, 0, G_OPTION_ARG_INT, &options.data.timeout,
     N_("Set dialog timeout in seconds"), N_("TIMEOUT") },
   { "timeout-indicator", 0, 0, G_OPTION_ARG_STRING, &options.data.to_indicator,
@@ -1517,6 +1523,10 @@ yad_options_init (void)
   options.data.use_posy = FALSE;
   options.data.posy = 0;
   options.data.geometry = NULL;
+#ifdef HAVE_GTK_LAYER_SHELL
+  options.data.layer = NULL;
+  options.data.edge = NULL;
+#endif
   options.data.dialog_text = NULL;
   options.data.text_align = GTK_JUSTIFY_LEFT;
   options.data.dialog_image = NULL;

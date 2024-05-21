@@ -33,6 +33,10 @@
 
 #include "yad.h"
 
+#ifdef HAVE_GTK_LAYER_SHELL
+#  include <gtk-layer-shell.h>
+#endif
+
 YadOptions options;
 static GtkWidget *dialog = NULL;
 static GtkWidget *text = NULL;
@@ -340,9 +344,79 @@ static GtkWidget *
 create_dialog (void)
 {
   GtkWidget *dlg, *vbox, *layout;
+#ifdef HAVE_GTK_LAYER_SHELL
+  GtkLayerShellLayer layer = GTK_LAYER_SHELL_LAYER_ENTRY_NUMBER;
+  GtkLayerShellEdge edge = GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER;
+  GtkLayerShellEdge corner = GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER;
+#endif
 
   /* create dialog window */
   dlg = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+#ifdef HAVE_GTK_LAYER_SHELL
+  if (options.data.layer)
+    {
+      if (strcasecmp (options.data.layer, "background") == 0)
+        layer = GTK_LAYER_SHELL_LAYER_BACKGROUND;
+      else if (strcasecmp (options.data.layer, "bottom") == 0)
+        layer = GTK_LAYER_SHELL_LAYER_BOTTOM;
+      else if (strcasecmp (options.data.layer, "top") == 0)
+        layer = GTK_LAYER_SHELL_LAYER_TOP;
+      else if (strcasecmp (options.data.layer, "overlay") == 0)
+        layer = GTK_LAYER_SHELL_LAYER_OVERLAY;
+   }
+
+  if (options.data.edge)
+    {
+      if (strcasecmp (options.data.edge, "top") == 0)
+        edge = GTK_LAYER_SHELL_EDGE_TOP;
+      else if (strcasecmp (options.data.edge, "bottom") == 0)
+        edge = GTK_LAYER_SHELL_EDGE_BOTTOM;
+      else if (strcasecmp (options.data.edge, "left") == 0)
+        edge = GTK_LAYER_SHELL_EDGE_LEFT;
+      else if (strcasecmp (options.data.edge, "right") == 0)
+        edge = GTK_LAYER_SHELL_EDGE_RIGHT;
+      else if (strcasecmp (options.data.edge, "topleft") == 0)
+        {
+          edge = GTK_LAYER_SHELL_EDGE_LEFT;
+          corner = GTK_LAYER_SHELL_EDGE_TOP;
+        }
+      else if (strcasecmp (options.data.edge, "topright") == 0)
+        {
+          edge = GTK_LAYER_SHELL_EDGE_RIGHT;
+          corner = GTK_LAYER_SHELL_EDGE_TOP;
+        }
+      else if (strcasecmp (options.data.edge, "bottomleft") == 0)
+        {
+          edge = GTK_LAYER_SHELL_EDGE_LEFT;
+          corner = GTK_LAYER_SHELL_EDGE_BOTTOM;
+        }
+      else if (strcasecmp (options.data.edge, "bottomright") == 0)
+        {
+          edge = GTK_LAYER_SHELL_EDGE_RIGHT;
+          corner = GTK_LAYER_SHELL_EDGE_BOTTOM;
+        }
+    }
+
+     if (layer != GTK_LAYER_SHELL_LAYER_ENTRY_NUMBER || edge != GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER || corner != GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER)
+       gtk_layer_init_for_window (GTK_WINDOW (dlg));
+
+     if (layer != GTK_LAYER_SHELL_LAYER_ENTRY_NUMBER)
+       gtk_layer_set_layer (GTK_WINDOW (dlg), layer);
+
+     if (edge != GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER)
+       {
+         gtk_layer_set_exclusive_zone (GTK_WINDOW (dlg), 0);
+         gtk_layer_set_margin (GTK_WINDOW (dlg), GTK_LAYER_SHELL_EDGE_LEFT, 20);
+         gtk_layer_set_margin (GTK_WINDOW (dlg), GTK_LAYER_SHELL_EDGE_RIGHT, 20);
+         gtk_layer_set_margin (GTK_WINDOW (dlg), GTK_LAYER_SHELL_EDGE_TOP, 10);
+         gtk_layer_set_margin (GTK_WINDOW (dlg), GTK_LAYER_SHELL_EDGE_BOTTOM, 20);
+         gtk_layer_set_anchor (GTK_WINDOW (dlg), edge, TRUE);
+         if (corner != GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER)
+           gtk_layer_set_anchor (GTK_WINDOW (dlg), corner, TRUE);
+       }
+#endif
+
   if (options.data.splash)
     gtk_window_set_type_hint (GTK_WINDOW (dlg), GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
   gtk_window_set_title (GTK_WINDOW (dlg), options.data.dialog_title);
